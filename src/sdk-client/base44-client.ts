@@ -5,4 +5,4 @@ export const base44 = createClient({
 });
 
 // Entity exports
-export const { Product, Forecast, AppSettings } = base44.entities;
+export const { Product, Forecast, AppSettings, NotebookSource } = base44.entities;

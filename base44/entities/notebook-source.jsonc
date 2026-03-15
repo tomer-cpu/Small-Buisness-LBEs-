@@ -1,0 +1,46 @@
+{
+  "name": "NotebookSource",
+  "description": "NotebookLM notebook connection configuration for the BASE44 agent knowledge source",
+  "fields": [
+    {
+      "name": "notebook_id",
+      "type": "string",
+      "required": true,
+      "description": "NotebookLM notebook identifier or share URL"
+    },
+    {
+      "name": "label",
+      "type": "string",
+      "required": true,
+      "description": "Display label for this notebook source"
+    },
+    {
+      "name": "description",
+      "type": "string",
+      "description": "What knowledge this notebook contains"
+    },
+    {
+      "name": "source_type",
+      "type": "string",
+      "enum": ["business_docs", "financial_guides", "product_research", "market_analysis", "custom"],
+      "required": true,
+      "description": "Category of knowledge in this notebook"
+    },
+    {
+      "name": "sync_enabled",
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this source is actively feeding the agent"
+    },
+    {
+      "name": "last_synced_at",
+      "type": "string",
+      "description": "ISO timestamp of last successful sync"
+    },
+    {
+      "name": "cached_summary",
+      "type": "string",
+      "description": "Cached NotebookLM-generated summary for agent context"
+    }
+  ]
+}

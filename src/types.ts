@@ -2,7 +2,8 @@ export type View =
   | { type: 'dashboard' }
   | { type: 'products' }
   | { type: 'forecast' }
-  | { type: 'reports' };
+  | { type: 'reports' }
+  | { type: 'notebooklm' };
 
 export type CurrencyCode = 'ILS' | 'USD' | 'EUR' | 'GBP';
 export type Language = 'he' | 'en';

@@ -21,6 +21,7 @@ export default function Sidebar({
     { view: { type: 'products' }, icon: '📦', label: isHe ? 'מוצרים' : 'Products' },
     { view: { type: 'forecast' }, icon: '📈', label: isHe ? 'תחזיות' : 'Forecast' },
     { view: { type: 'reports' }, icon: '📋', label: isHe ? 'דוחות' : 'Reports' },
+    { view: { type: 'notebooklm' }, icon: '🔗', label: isHe ? 'NotebookLM' : 'NotebookLM' },
   ];
 
   return (
