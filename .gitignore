@@ -1,8 +1,9 @@
+node_modules/
+dist/
+.env
+.env.local
+*.local
 __pycache__/
 *.pyc
-*.pyo
 data/
 *.xlsx
-.env
-.venv/
-venv/

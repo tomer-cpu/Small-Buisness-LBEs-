@@ -1,0 +1,32 @@
+{
+  "name": "Forecast",
+  "type": "object",
+  "properties": {
+    "product_id": {
+      "type": "string",
+      "description": "מזהה המוצר"
+    },
+    "sku": {
+      "type": "string",
+      "description": "מק״ט המוצר (לתצוגה)"
+    },
+    "year": {
+      "type": "number",
+      "description": "שנה"
+    },
+    "month": {
+      "type": "number",
+      "description": "חודש (1-12)"
+    },
+    "projected_units": {
+      "type": "number",
+      "description": "כמות יחידות צפויה למכירה"
+    },
+    "notes": {
+      "type": "string",
+      "default": "",
+      "description": "הערות"
+    }
+  },
+  "required": ["product_id", "sku", "year", "month", "projected_units"]
+}

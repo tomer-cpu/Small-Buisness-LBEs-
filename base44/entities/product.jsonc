@@ -1,0 +1,46 @@
+{
+  "name": "Product",
+  "type": "object",
+  "properties": {
+    "sku": {
+      "type": "string",
+      "description": "מק״ט - מזהה מוצר ייחודי"
+    },
+    "name": {
+      "type": "string",
+      "description": "שם המוצר"
+    },
+    "description": {
+      "type": "string",
+      "description": "תיאור המוצר"
+    },
+    "category": {
+      "type": "string",
+      "description": "קטגוריית המוצר"
+    },
+    "unit_cost": {
+      "type": "number",
+      "description": "עלות ייצור ליחידה"
+    },
+    "selling_price": {
+      "type": "number",
+      "description": "מחיר מכירה ליחידה"
+    },
+    "min_order_quantity": {
+      "type": "number",
+      "default": 1,
+      "description": "כמות הזמנה מינימלית"
+    },
+    "lead_time_days": {
+      "type": "number",
+      "default": 0,
+      "description": "זמן אספקה בימים"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "האם המוצר פעיל"
+    }
+  },
+  "required": ["sku", "name", "unit_cost", "selling_price"]
+}

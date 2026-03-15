@@ -1,0 +1,11 @@
+{
+  "name": "SmallBizFinance",
+  "description": "כלי תכנון פיננסי לעסקים קטנים - ניהול מוצרים, תחזיות מתגלגלות ואומדני מכירות ורווח",
+
+  "site": {
+    "installCommand": "npm install",
+    "buildCommand": "npm run build",
+    "serveCommand": "npm run dev",
+    "outputDirectory": "./dist"
+  }
+}
