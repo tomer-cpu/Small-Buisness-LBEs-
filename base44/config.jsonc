@@ -1,6 +1,6 @@
 {
-  "name": "SmallBizFinance",
-  "description": "כלי תכנון פיננסי לעסקים קטנים - ניהול מוצרים, תחזיות מתגלגלות ואומדני מכירות ורווח",
+  "name": "VistaFlow",
+  "description": "VistaFlow - כלי תכנון פיננסי לעסקים קטנים. ניהול מוצרים, תחזיות מתגלגלות ואומדני מכירות ורווח",
 
   "site": {
     "installCommand": "npm install",

@@ -27,7 +27,7 @@ export default function Sidebar({
     <aside className="sidebar" dir={isHe ? 'rtl' : 'ltr'}>
       <div className="sidebar-header">
         <h1 className="app-title" onClick={() => navigate({ type: 'dashboard' })}>
-          {businessName || (isHe ? 'תכנון פיננסי' : 'BizFinance')}
+          {businessName || 'VistaFlow'}
         </h1>
       </div>
 
