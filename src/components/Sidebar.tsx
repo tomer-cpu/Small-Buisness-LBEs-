@@ -22,6 +22,7 @@ export default function Sidebar({
     { view: { type: 'forecast' }, icon: '📈', label: isHe ? 'תחזיות' : 'Forecast' },
     { view: { type: 'reports' }, icon: '📋', label: isHe ? 'דוחות' : 'Reports' },
     { view: { type: 'notebooklm' }, icon: '🔗', label: isHe ? 'NotebookLM' : 'NotebookLM' },
+    { view: { type: 'chat' }, icon: '💬', label: isHe ? 'צ\'אט עם Claude' : 'Chat with Claude' },
   ];
 
   return (

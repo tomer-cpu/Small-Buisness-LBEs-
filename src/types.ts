@@ -3,7 +3,8 @@ export type View =
   | { type: 'products' }
   | { type: 'forecast' }
   | { type: 'reports' }
-  | { type: 'notebooklm' };
+  | { type: 'notebooklm' }
+  | { type: 'chat' };
 
 export type CurrencyCode = 'ILS' | 'USD' | 'EUR' | 'GBP';
 export type Language = 'he' | 'en';

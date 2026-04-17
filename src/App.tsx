@@ -5,6 +5,7 @@ import Products from './pages/Products';
 import ForecastPage from './pages/ForecastPage';
 import Reports from './pages/Reports';
 import NotebookLMPage from './pages/NotebookLM';
+import Chat from './pages/Chat';
 import type { View, CurrencyCode, Language } from './types';
 import './App.css';
 
@@ -14,6 +15,7 @@ function getViewFromUrl(): View {
   if (path === '/forecast') return { type: 'forecast' };
   if (path === '/reports') return { type: 'reports' };
   if (path === '/notebooklm') return { type: 'notebooklm' };
+  if (path === '/chat') return { type: 'chat' };
   return { type: 'dashboard' };
 }
 
@@ -22,6 +24,7 @@ function getUrlFromView(view: View): string {
   if (view.type === 'forecast') return '/forecast';
   if (view.type === 'reports') return '/reports';
   if (view.type === 'notebooklm') return '/notebooklm';
+  if (view.type === 'chat') return '/chat';
   return '/';
 }
 
@@ -51,6 +54,7 @@ function App() {
         {view.type === 'forecast' && <ForecastPage currency={currency} lang={lang} />}
         {view.type === 'reports' && <Reports currency={currency} lang={lang} />}
         {view.type === 'notebooklm' && <NotebookLMPage lang={lang} />}
+        {view.type === 'chat' && <Chat lang={lang} />}
       </main>
     </div>
   );

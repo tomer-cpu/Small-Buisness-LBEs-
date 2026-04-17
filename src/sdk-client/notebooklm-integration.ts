@@ -1,14 +1,14 @@
 import { base44 } from './base44-client';
 
 /**
- * NotebookLM ↔ BASE44 Integration Service
+ * NotebookLM <-> BASE44 / local storage integration.
  *
- * Bridges Google NotebookLM notebooks with the BASE44 agent,
- * allowing the VistaFlow assistant to use notebook knowledge
- * when answering financial planning questions.
+ * When BASE44 is configured (VITE_BASE44_APP_ID is set and entity exists)
+ * notebook sources persist there. Otherwise they fall back to localStorage
+ * so the user can try the integration without a backend.
  */
 
-export const NotebookSource = base44.entities.NotebookSource;
+const STORAGE_KEY = 'vistaflow.notebook_sources';
 
 export interface NotebookSourceType {
   id: string;
@@ -21,103 +21,142 @@ export interface NotebookSourceType {
   cached_summary?: string;
 }
 
-// NotebookLM share URL pattern
 const NOTEBOOKLM_URL_REGEX = /notebooklm\.google\.com\/notebook\/([a-zA-Z0-9_-]+)/;
 
-/**
- * Extract notebook ID from a NotebookLM share URL
- */
 export function parseNotebookUrl(url: string): string | null {
   const match = url.match(NOTEBOOKLM_URL_REGEX);
   if (match) return match[1];
-  // If it's already a plain ID, return as-is
   if (/^[a-zA-Z0-9_-]+$/.test(url.trim())) return url.trim();
   return null;
 }
 
-/**
- * Build the NotebookLM share URL from an ID
- */
 export function buildNotebookUrl(notebookId: string): string {
   return `https://notebooklm.google.com/notebook/${notebookId}`;
 }
 
-/**
- * Load all connected notebook sources
- */
-export async function listNotebookSources(): Promise<NotebookSourceType[]> {
-  const result = await NotebookSource.list();
-  return result as NotebookSourceType[];
+function readLocal(): NotebookSourceType[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as NotebookSourceType[]) : [];
+  } catch {
+    return [];
+  }
 }
 
-/**
- * Connect a new NotebookLM notebook as a knowledge source
- */
+function writeLocal(sources: NotebookSourceType[]): void {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(sources));
+}
+
+function generateId(): string {
+  return `nb_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function base44Entity() {
+  try {
+    return (base44.entities as Record<string, unknown>).NotebookSource as
+      | {
+          list: () => Promise<unknown[]>;
+          create: (data: Partial<NotebookSourceType>) => Promise<NotebookSourceType>;
+          update: (id: string, data: Partial<NotebookSourceType>) => Promise<NotebookSourceType>;
+          delete: (id: string) => Promise<void>;
+        }
+      | undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export async function listNotebookSources(): Promise<NotebookSourceType[]> {
+  const entity = base44Entity();
+  if (entity) {
+    try {
+      const result = await entity.list();
+      return result as NotebookSourceType[];
+    } catch {
+      // Fall through to local storage
+    }
+  }
+  return readLocal();
+}
+
 export async function connectNotebook(params: {
   notebook_id: string;
   label: string;
   description?: string;
   source_type: NotebookSourceType['source_type'];
 }): Promise<NotebookSourceType> {
-  const record = await NotebookSource.create({
+  const payload = {
     ...params,
     sync_enabled: true,
     last_synced_at: new Date().toISOString(),
-  });
-  return record as NotebookSourceType;
+  };
+
+  const entity = base44Entity();
+  if (entity) {
+    try {
+      return await entity.create(payload);
+    } catch {
+      // Fall through to local storage
+    }
+  }
+
+  const record: NotebookSourceType = { id: generateId(), ...payload };
+  const current = readLocal();
+  writeLocal([...current, record]);
+  return record;
 }
 
-/**
- * Disconnect (remove) a notebook source
- */
 export async function disconnectNotebook(id: string): Promise<void> {
-  await NotebookSource.delete(id);
+  const entity = base44Entity();
+  if (entity) {
+    try {
+      await entity.delete(id);
+      return;
+    } catch {
+      // Fall through to local storage
+    }
+  }
+  writeLocal(readLocal().filter(s => s.id !== id));
 }
 
-/**
- * Toggle sync status for a notebook source
- */
 export async function toggleSync(id: string, enabled: boolean): Promise<NotebookSourceType> {
-  const record = await NotebookSource.update(id, { sync_enabled: enabled });
-  return record as NotebookSourceType;
+  const entity = base44Entity();
+  if (entity) {
+    try {
+      return await entity.update(id, { sync_enabled: enabled });
+    } catch {
+      // Fall through to local storage
+    }
+  }
+  const current = readLocal();
+  const updated = current.map(s => (s.id === id ? { ...s, sync_enabled: enabled } : s));
+  writeLocal(updated);
+  return updated.find(s => s.id === id)!;
 }
 
-/**
- * Update the cached summary (from NotebookLM content)
- */
 export async function updateCachedSummary(id: string, summary: string): Promise<NotebookSourceType> {
-  const record = await NotebookSource.update(id, {
+  const patch = {
     cached_summary: summary,
     last_synced_at: new Date().toISOString(),
-  });
-  return record as NotebookSourceType;
+  };
+
+  const entity = base44Entity();
+  if (entity) {
+    try {
+      return await entity.update(id, patch);
+    } catch {
+      // Fall through to local storage
+    }
+  }
+
+  const current = readLocal();
+  const updated = current.map(s => (s.id === id ? { ...s, ...patch } : s));
+  writeLocal(updated);
+  return updated.find(s => s.id === id)!;
 }
 
-/**
- * Build agent context from all active notebook sources.
- * This is injected into the BASE44 agent's system prompt
- * so it can reference NotebookLM knowledge when answering questions.
- */
-export async function buildAgentKnowledgeContext(): Promise<string> {
-  const sources = await listNotebookSources();
-  const activeSources = sources.filter(s => s.sync_enabled && s.cached_summary);
-
-  if (activeSources.length === 0) return '';
-
-  const sections = activeSources.map(s =>
-    `### ${s.label} (${s.source_type})\n${s.cached_summary}`
-  );
-
-  return [
-    '## Knowledge from NotebookLM Sources',
-    '',
-    ...sections,
-  ].join('\n');
-}
-
-/**
- * Source type labels for the UI
- */
 export const SOURCE_TYPE_LABELS: Record<NotebookSourceType['source_type'], { he: string; en: string }> = {
   business_docs: { he: 'מסמכים עסקיים', en: 'Business Documents' },
   financial_guides: { he: 'מדריכים פיננסיים', en: 'Financial Guides' },
